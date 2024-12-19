@@ -304,6 +304,57 @@ When a visitor goes to fof.sh, they should immediately be redirected to a POST r
 
 
 %--- Section ---%
+\section{Prescription Encoding}
+A major usage of QR codes in the current stage is their incorporation into prescriptions to carry patient and medication information. When reconstructed back to digital upon scanning, a potential problem is the varying number of medications in one prescription. An algorithm is developed to encode and decode a list of strings to one string without loss. This is used to pack the list of, for example, drug names, into one URL parameter and unpack to be placed in the name section of each drug in the csv file.
+
+\subsection{Encoding}
+To encode the list of strings into one string, we loop through the list. Upon each iteration, the length of the current string, an indicator $\#$, and the value of the current string are appended to the resulting string. The following is the JavaScript implementation:
+
+\begin{verbatim}
+function encode(strs) {
+  let res = "";
+  for (let s of strs) {
+      res += s.length + "#" + s;
+  }
+  return res;
+}
+\end{verbatim}
+
+\subsection{Decoding}
+As we are confident in the structure of the resulting string always having a list of $(str.len)\#(str)$, we loop through the string looking for the indicator $\#$, get the length of the current string from before the indicator and extract the current string from after the indicator to decode the string into the list of strings. 
+The following is the Python implementation:
+
+\begin{verbatim}
+def decode(s):
+    res = []
+    i = 0
+    
+    while i < len(s):
+        j = i
+        while s[j] != '#':
+            j += 1
+        length = int(s[i:j])
+        i = j + 1
+        j = i + length
+        res.append(s[i:j])
+        i = j
+        
+    return res
+\end{verbatim}
+
+\subsection{Advantage}
+As the encoding and decoding process overpasses the value of the data, whatever the list of strings contains (for example, containing the indicate $\#$) would not affect the process. This saves the need to escape separators and the corner cases (empty string, a string that ends with a separator is followed by a string that starts with a separator) that follow.
+
+\subsection{Time and Space Complexity}
+\begin{itemize}
+    \item \textbf{Time Complexity:} $O(m)$ for $encode()$ and $decode()$
+    \item \textbf{Space Complexity:} $O(1)$ for $encode()$ and $decode()$
+\end{itemize}
+
+Where $m$ is the sum of lengths of all the strings and $n$ is the number of strings.
+
+
+%--- Section ---%
 \section{Future Work}
 \begin{enumerate}[label=\arabic*.]
 \item 
