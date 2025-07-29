@@ -1,0 +1,419 @@
+\documentclass[12pt,a4paper]{article}
+
+% Language setting
+\usepackage[british]{babel}
+
+% Set page size and margins
+\usepackage[a4paper,top=2cm,bottom=2cm,left=2.5cm,right=2.5cm,marginparwidth=1.75cm]{geometry}
+
+%----------- APA style references & citations (starting) ---
+% Useful packages
+%\usepackage[natbibapa]{apacite} % APA-style citations.
+% \usepackage[numbers]{natbib}
+
+\usepackage[style=apa, backend=biber]{biblatex} % APA 7th edition style citations using biblatex
+\addbibresource{references.bib} % Your .bib file
+
+% Formatting DOI in APA-7 style
+%\renewcommand{\doiprefix}{https://doi.org/}
+
+% Add additional APA 7th edition requirements
+\DeclareLanguageMapping{british}{british-apa} % Set language mapping
+\DeclareFieldFormat[article]{volume}{\apanum{#1}} % Format volume number
+
+% Modify 'and' to '&' in the bibliography
+\renewcommand*{\finalnamedelim}{%
+  \ifnumgreater{\value{liststop}}{2}{\finalandcomma}{}%
+  \addspace\&\space}
+  
+%----------- APA style references & citations (ending) ---
+
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{hyperref}
+%\usepackage{orcidlink}
+\usepackage[title]{appendix}
+\usepackage{mathrsfs}
+\usepackage{amsfonts}
+\usepackage{booktabs} % For \toprule, \midrule, \botrule
+\usepackage{caption}  % For \caption
+\usepackage{threeparttable} % For table footnotes
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{chngcntr}
+\usepackage{booktabs}
+\usepackage{lipsum}
+\usepackage{subcaption}
+\usepackage{authblk}
+\usepackage[T1]{fontenc}    % Font encoding
+\usepackage{csquotes}       % Include csquotes
+\usepackage{diagbox}
+
+
+% Customize line spacing
+\usepackage{setspace}
+\onehalfspacing % 1.5 line spacing
+
+% Redefine section and subsection numbering format
+\usepackage{titlesec}
+\titleformat{\section} % Redefine section numbering format
+  {\normalfont\Large\bfseries}{\thesection.}{1em}{}
+  
+% Customize line numbering format to right-align line numbers
+\usepackage{lineno} % Add the lineno package
+\renewcommand\linenumberfont{\normalfont\scriptsize\sffamily\color{blue}}
+\rightlinenumbers % Right-align line numbers
+
+\linenumbers % Enable line numbering
+
+% Define a new command for the fourth-level title.
+\newcommand{\subsubsubsection}[1]{%
+  \vspace{\baselineskip}% Add some space
+  \noindent\textbf{#1\\}\quad% Adjust formatting as needed
+}
+% Change the position of the table caption above the table
+\usepackage{float}   % for customizing caption position
+\usepackage{caption} % for customizing caption format
+\captionsetup[table]{position=top} % caption position for tables
+
+% Define the unnumbered list
+\makeatletter
+\newenvironment{unlist}{%
+  \begin{list}{}{%
+    \setlength{\labelwidth}{0pt}%
+    \setlength{\labelsep}{0pt}%
+    \setlength{\leftmargin}{2em}%
+    \setlength{\itemindent}{-2em}%
+    \setlength{\topsep}{\medskipamount}%
+    \setlength{\itemsep}{3pt}%
+  }%
+}{%
+  \end{list}%
+}
+\makeatother
+
+% Suppress the warning about \@parboxrestore
+\pdfsuppresswarningpagegroup=1
+
+
+%-------------------------------------------
+% Paper Head
+%-------------------------------------------
+\title{FHIR Over Fax - Micro FHIR Embeddings in Fax Documents}
+
+\author[1]{Clark Van Oyen}
+%\author[1,*]{Fifth Author}
+%\affil[1]{\small Department, Organization, Street, City, 100190, State, Country}
+%\affil[*]{Corresponding author: \texttt{user\_id@university.edu}}
+
+\date{Nov 13, 2024}  % Remove date
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+In “\textit{FHIR over Fax}” we propose to use existing technology standards to bridge the gap between analog and digital data in fax communication. By adopting such an approach, healthcare vendors and providers they serve, can preserve and act on the full digital structure of information, enhancing efficiency and accuracy in patient care.
+\end{abstract}
+
+\textbf{Keywords}: FHIR, Fax, QR Code  
+
+%-------------------------------------------
+% Paper Body
+%-------------------------------------------
+%--- Section ---%
+%\section*{Nomenclature}
+
+%\begin{tabbing}
+%$T$\qquad \= Temperature (K)\\
+%$u_i$ \> Velocity in the x-direction (m/s)\\
+%$\tau_{ij}$ \> Shear stress (N/m2)\\
+%$\omega$ \> Specific turbulent dissipation rate (1/s)\\
+%$Y_\omega$ \> Dissipation of $\omega$
+%\end{tabbing}
+
+
+
+%--- Section ---%
+\section{Introduction}
+
+Fax remains a ubiquitous method of communication in the healthcare sector despite technological advancements. Its widespread use and similarity to other communication channels make it a vital tool, but its traditional analog format poses challenges in handling structured data. This proposal aims to address this problem by introducing FHIR over Fax.
+
+%--- Section ---%
+\section{The Problem}
+
+Faxing typically sends images in an analog format, which is not conducive to structured data handling. This analog format hampers the recipient's ability to act on the full digital structure of the information.
+
+Examples in healthcare below. While we are focused on Fax here, in general the problems and methods discussed also apply to printed paper medical records, PDF documents, or other image based transmissions as well.
+
+What can we put in the QR codes that are Faxed?
+\begin{enumerate}[label=\arabic*.]
+\item \textbf{Avoid data entry at pharmacies.}
+Scanning faxed prescriptions into the pharmacy management system. Many pharmacies already support 2d barcode scanning.
+\item \textbf{Verify and scan lab req.}
+Lab requisition data can be embedded in a QR on the lab req document, for easier scanning by the lab, and verification of order info.
+\item \textbf{Verify and scan in a Referral.}
+Specialists could scan referral data into their systems without needing manual data entry from a Fax.
+\end{enumerate}
+
+
+
+%--- Section ---%
+\section{The Proposed Solution: FHIR Over Fax}
+This is a compact format for including digital content via QR code within a Fax.
+
+\begin{itemize}
+\item \textbf{Utilizing Existing Standards:}
+By using QR codes and the FHIR standard, we ensure easier adoption since both are well-established technologies.
+\item \textbf{FHIR Compression:}
+FHIR's verbosity can be an issue, as it might not fit into a QR code. Compressing it via a static reference or offloading the lookup table to a web-based store will solve this issue.
+\end{itemize}
+
+%--- Section ---%
+\section{Methodology}
+
+\begin{itemize}
+\item \textbf{Embed Original Digital Contents}
+Include the original digital contents of the document in a QR code, preserving the structure on the receiving side.
+\item \textbf{Use QR Codes:}
+Opt for QR codes as a standardized and universally recognized way to encode digital data within an image-based document format.
+\item \textbf{Compress FHIR Data:}
+Utilize a static reference or a web-based store to compress the verbose FHIR data, as most of the structure is repetitive between messages.
+\end{itemize}
+
+%--- Section ---%
+\section{Example}
+Let’s start with a bit of a contrived example - sending a demographic and contact record from one healthcare IT system to another (EMRs or what have you). This might be helpful if we want to send a patient’s contact info to a new healthcare provider in an automated way, although in the real world it is likely to contain a bit more medical content such as a referral form)
+
+Let’s say we want to send a PDF that looks something like this:
+
+
+\begin{minipage}{\hsize}%
+\lstset{language=Python}% Set your language (you can change the language for each code-block optionally)
+\begin{lstlisting}[frame=single,framexleftmargin=-1pt,framexrightmargin=-17pt,framesep=12pt,linewidth=0.95\textwidth]
+PATIENT NAME: Fred Brown
+DOB: 1996-01-01
+HCN: 1234567890
+SEX: M
+PHONE: 1231231234
+EMAIL: FREDISTHEBEST96@GMAIL.COM
+\end{lstlisting}
+\end{minipage}
+
+Now, the basic FHIR object for this is called a Patient record. Let’s add a \href{https://github.com/janl/mustache.js}{Mustache} template for that to our lookup table. We save a representation of a particular FHIR document in our table as “Patient1v1”. Mustache is chosen as it’s a simple and secure (no arbitrary code execution) template language available on many platforms.
+
+\begin{verbatim}
+{
+  "resourceType": "Patient",
+  "id": "pat1",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Patient generated
+     from MicroFHIR - Patient1v1</div>"
+  },
+  "identifier": [
+    {
+      "use": "usual",
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MR"
+          }
+        ]
+      },
+      "system": "urn:oid:0.1.2.3.4.5.6.7",
+      "value": "{{HCN}}"
+    }
+  ],
+  "active": true,
+  "name": [
+    {
+      "use": "official",
+      "family": "{{LAST_NAME}}",
+      "given": [
+        "{{FIRST_NAME}}"
+      ]
+    }
+  ],
+  "gender": "{{GENDER}}",
+  "managingOrganization": {
+    "reference": "Organization/1",
+    "display": "{{SENDER}}"
+  },
+ "telecom" : [
+{{# PHONE }}
+  {
+    "system" : "phone",
+    "value" : "{{PHONE}}",
+    "use" : "home",
+    "rank" : 1
+  }{{# CELL_PHONE }},{{/ CELL_PHONE }}
+{{/ PHONE }}
+{{# CELL_PHONE }}
+  {
+    "system" : "phone",
+    "value" : "{{CELL_PHONE}}",
+    "use" : "mobile",
+    "rank" : 2
+  }
+{{/ CELL_PHONE }}
+]
+}
+
+\end{verbatim}
+
+A free open source service will be used to make QR codes directly readable, such as to allow direct copy-paste of data into a target system (though the idea is to have an automated process)
+
+The encoded data of the QR code will be of the form
+\begin{enumerate}[label=\arabic*.]
+\item A prefix, fof.sh/ so the URL may resolve
+\item When decoded, the PIPE separated list of fields is supplied.
+\item The first parameter is an identifier of the FHIR template to use. These are hosted on any URL. If a hostname is not specified, it’s assumed as fof.sh/templates/<id>.
+\item The 2nd parameter:  A ~24-byte signature value may optionally be included to verify the data are correct (and that Cortico generated the QR as an authority). HMAC is recommended as a simple compact starting point, but it’s possible to make \href{https://crypto.stackexchange.com/questions/15356/how-do-i-create-a-short-signature-e-g-less-than-100-bytes}{short asymmetric signatures} so the verifier can check it on their own.
+\item The 3rd parameter is a unix timestamp (seconds since epoch) in decimal
+\item The 4th parameter is a signer ID (email address typically)
+\item The remaining parameters are an ordered list for injection in the template. As such, Mustache templates should not be edited. Rather, a new version should be created on each edit, with a new URL such as: Patient1v1.json.
+\end{enumerate}
+
+With unishox2, the resulting encoded blob is 60.5 bytes, plus the URL portion of 13 bytes, so 74 bytes in all. This would require a Version 6 QR Code with medium error correction. A version 10 is expected to reasonably fit in a Fax, which gives us 213 bytes. This is double for a Version 15. For larger payloads, a reference to an online hosted resource may be preferable, at the sacrifice of the portability and simplicity of a direct embedding.
+
+The QR Code version can be determined based on the length of the included data. Further work is needed to find the best performing version and error correction levels for Faxing QR Codes. Fax has a poor vertical resolution of 1100 which may be the limiting factor.
+
+In a separate Brimstone project we explore patient centred records, and in this scenario we could consider a QR scheme which points to an original uncompressed FHIR document in the patient’s store.
+
+
+%--- Section ---%
+\section{Senders and Receivers}
+For FHIR Over Fax to function, we need the Fax sender and receiver to both participate.
+
+A free open source library and API service can be offered to make these roles easy for endpoints to adopt.
+
+The \textbf{sender} must embed the QR code in the sent fax document. An open source javascript library should be provided to take care of this. As input, it will require the structured data embedded in the form to be faxed. EMRs such as Oscar make this easy due to relatively standard eForm data field naming. A function of the nature \verb+fof.embed(fields, pdf_document)+ should be defined. It should look for a 1 inch square of whitespace to safely embed the QR code.
+
+The \textbf{receiver} can participate by simply scanning the QR code to view the data on fof.sh in order to facilitate copy-paste for data entry. However, the more useful case is if they embed the javascript library and call \verb+fof.extract(pdf_document)+ this will return FHIR formatted or other original structured data for integration into any software system they wish. 
+
+
+%--- Section ---%
+\section{Security Considerations}
+When a visitor goes to fof.sh, they should immediately be redirected to a POST request with the payload as a parameter, so we may pop the URL from History and avoid sharing the link. It’s not an assumed intention that we wish to convert the medical document to a shareable web link, and we certainly want to avoid doing so unintentionally.
+
+
+%--- Section ---%
+\section{Prescription Encoding}
+A major usage of QR codes in the current stage is their incorporation into prescriptions to carry patient and medication information. When reconstructed back to digital upon scanning, a potential problem is the varying number of medications in one prescription. An algorithm is developed to encode and decode a list of strings to one string without loss. This is used to pack the list of, for example, drug names, into one URL parameter and unpack to be placed in the name section of each drug in the csv file.
+
+\subsection{Encoding}
+To encode the list of strings into one string, we loop through the list. Upon each iteration, the length of the current string, an indicator $\#$, and the value of the current string are appended to the resulting string. The following is the JavaScript implementation:
+
+\begin{verbatim}
+function encode(strs) {
+  let res = "";
+  for (let s of strs) {
+      res += s.length + "#" + s;
+  }
+  return res;
+}
+\end{verbatim}
+
+\subsection{Decoding}
+As we are confident in the structure of the resulting string always having a list of $(str.len)\#(str)$, we loop through the string looking for the indicator $\#$, get the length of the current string from before the indicator and extract the current string from after the indicator to decode the string into the list of strings. 
+The following is the Python implementation:
+
+\begin{verbatim}
+def decode(s):
+    res = []
+    i = 0
+    
+    while i < len(s):
+        j = i
+        while s[j] != '#':
+            j += 1
+        length = int(s[i:j])
+        i = j + 1
+        j = i + length
+        res.append(s[i:j])
+        i = j
+        
+    return res
+\end{verbatim}
+
+\subsection{Advantage}
+As the encoding and decoding process overpasses the value of the data, whatever the list of strings contains (for example, containing the indicate $\#$) would not affect the process. This saves the need to escape separators and the corner cases (empty string, a string that ends with a separator is followed by a string that starts with a separator) that follow.
+
+\subsection{Time and Space Complexity}
+\begin{itemize}
+    \item \textbf{Time Complexity:} $O(m)$ for $encode()$ and $decode()$
+    \item \textbf{Space Complexity:} $O(1)$ for $encode()$ and $decode()$
+\end{itemize}
+
+Where $m$ is the sum of lengths of all the strings and $n$ is the number of strings.
+
+
+%--- Section ---%
+\section{Future Work}
+\begin{enumerate}[label=\arabic*.]
+\item 
+
+\begin{table}[!ht]
+%\caption{Sample table with footnotes}
+\begin{threeparttable}
+\begin{tabular*}{\columnwidth}{@{\extracolsep\fill}llll@{\extracolsep\fill}}
+\toprule
+Purpose & URL & Notes\\
+\midrule
+%Patient1v1.json,fd8fd8aa,20210101121212,FredBrown,1996-01-01,1234567890,male,1231231234,FREDISTHEBEST96@GMAIL.COM
+$\textbf{API Generate a QR}$ & $\verb+POST api.fof.sh/gen/fields=+$ & (later) \\
+$\textbf{API to Parse a PDF with QR}$ & $\verb+api.fof.sh/extract/?pdf_document=+$ & (later) \\
+$\textbf{Scan a Code}$ & $\verb+fof.sh/r/<payload>+$ & \\
+$\textbf{FHIR Templates (Mustache)}$  & $\verb+fof.sh/templates/<filename>+$ & \\
+$\textbf{Information Websit}$ & $\verb+fof.sh+$ & \\
+\bottomrule
+\end{tabular*}
+\end{threeparttable}
+\end{table}
+
+\item A payload may be encoded with Apache Avro, which is more desirable for this for compression while plain CSV is better for accessibility.
+\item Encryption is something to consider during this encode step although limiting the recipient’s ability to use the data
+\item Implementing and test BLS key generation in Python/JS and verification in JS.
+\item Encoding a FHIR patient summary as AVRO in a QR code
+\end{enumerate}
+\subsection{Future Related Use Cases}
+\begin{enumerate}[label=\arabic*.]
+\item What can we put in a QR within a PDF document which may be delivered to the patient?
+\begin{enumerate}[label=\alph*.]
+\item \textbf{Verify doctor’ notes.} The QR code embedded in a sick note can be scanned to cross-check a signed date and sender details for a sick note, verifying neither was tampered with or spoofed.
+\item \textbf{Verify and scan lab req.} Lab requisition data can be embedded in a QR on the lab req document, for easier scanning by the lab, and verification of order info.
+\item \textbf{Verify and Digitize patient-reported outcome data.} Prevent any tampering with PROM information.
+\end{enumerate}
+\item How can the patient carry around permanent records as QR codes?
+
+\begin{enumerate}[label=\alph*.]
+\item \textbf{Sharing a personal health record.} A patient may print off and provide a QR to their new doctor to allow looking up their records in an arbitrary system such as PHR. The QR can encode a universal patient ID, direct patient summary info, and an external URL to their records in a location such as their personal health record.
+\item \textbf{Medical safety data (Glass Breaking).} Allows key details to be disclosed by anyone who scans the medical safety card for example if a patient is unconscious.
+\item \textbf{Medical credentials.} Signed flu shot date, by the provider who administered.
+\end{enumerate}
+\item Other
+
+\begin{enumerate}[label=\alph*.]
+\item \textbf{Link to digital twin and related data.} Link to an online conversation about that specific medical document, for example, scan to engage in a realtime chat about a prescription document.
+\end{enumerate}
+\end{enumerate}
+
+
+
+\section*{References}
+\begin{enumerate}
+    \item [1] J. Mandel, “Design Sketch: SMART Health Links,” YouTube. [Online]. Available: \textit{https://www.youtube.com/watch?v=SbM9I20lH64}
+    \item [2] “SHL Introduction,” SMART Health Links. Accessed: Oct. 22, 2024. [Online]. Available: \textit{https://docs.smarthealthit.org/smart-health-links/}
+    \item [3] smart-on-fhir, “GitHub - smart-on-fhir/smart-health-links: Static documentation site for SMART Health Links,” GitHub. Accessed: Oct. 22, 2024. [Online]. Available: \textit{https://github.com/smart-on-fhir/smart-health-links}
+
+\end{enumerate}
+
+
+
+\end{document}
